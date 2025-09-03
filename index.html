@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - SMPP</title>
+    <!-- Framework Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fontes do Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- CSS embutido -->
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Roboto', sans-serif;
+        }
+        .logo {
+            width: 40px;
+            height: auto;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+        header {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        header h1 {
+            font-size: 1.5rem;
+        }
+        .card {
+            border: none;
+            border-radius: .75rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,.1);
+            transition: transform .2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            font-weight: bold;
+            background-color: #e9ecef;
+            border-bottom: 0;
+            border-top-left-radius: .75rem;
+            border-top-right-radius: .75rem;
+        }
+        .card-highlight {
+            border: 2px solid #0d6efd;
+        }
+        .display-4 {
+            color: #343a40;
+        }
+        #status-conexao.connected {
+            color: #198754;
+            font-weight: bold;
+        }
+        #status-conexao.error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .login-container {
+            max-width: 400px;
+            margin-top: 5rem;
+        }
+        #connection-status-indicator {
+            font-size: 1.5rem;
+            vertical-align: middle;
+            transition: color 0.5s ease;
+        }
+        #connection-status-indicator.connected { color: #198754; }
+        #connection-status-indicator.error { color: #dc3545; }
+        #connection-status-indicator.pending { color: #ffc107; }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <header class="bg-dark text-white p-3">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0">
+                <svg class="logo" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5zM12 14.47l-8-4v4.06l8 4 8-4v-4.06l-8 4z"/></svg>
+                Sistema de Monitoramento e Pesagem (SMPP)
+            </h1>
+            <div id="user-info" class="d-none d-flex align-items-center">
+                <span id="connection-status-indicator" class="me-2" title="Status da Conexão com o Blynk">●</span>
+                <span id="welcome-message" class="me-3"></span>
+                <button id="logout-button" class="btn btn-outline-light btn-sm">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo principal que alterna entre Login e Dashboard -->
+    <div id="app-content" class="container flex-grow-1">
+        <!-- Tela de Login e Registro -->
+        <div id="login-section">
+            <div class="card login-container mx-auto">
+                <div class="card-body p-4">
+                    <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pills-login-tab" data-bs-toggle="pill" data-bs-target="#pills-login" type="button" role="tab" aria-controls="pills-login" aria-selected="true">Entrar</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-register-tab" data-bs-toggle="pill" data-bs-target="#pills-register" type="button" role="tab" aria-controls="pills-register" aria-selected="false">Registrar</button>
+                      </li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent">
+                      <div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="pills-login-tab">
+                        <form id="login-form">
+                          <h4 class="text-center mb-3">Login</h4>
+                          <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="login-username" placeholder="Usuário" required>
+                            <label for="login-username">Nome de Usuário</label>
+                          </div>
+                          <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="login-password" placeholder="Senha" required>
+                            <label for="login-password">Senha</label>
+                          </div>
+                          <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Entrar</button>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="tab-pane fade" id="pills-register" role="tabpanel" aria-labelledby="pills-register-tab">
+                        <form id="register-form">
+                            <h4 class="text-center mb-3">Criar Conta</h4>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="register-username" placeholder="Usuário" required>
+                                <label for="register-username">Nome de Usuário</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control" id="register-password" placeholder="Senha" required>
+                                <label for="register-password">Senha</label>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success">Registrar</button>
+                            </div>
+                        </form>
+                      </div>
+                    </div>
+                    <div id="auth-alert" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Controle (Dashboard) -->
+        <main id="dashboard-section" class="mt-4 mb-4 d-none">
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card text-center h-100">
+                        <div class="card-header">Balança em Tempo Real</div>
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <p class="card-title fs-5 mb-2">Peso Atual</p>
+                            <h2 class="display-4 fw-bold" id="peso-atual">0.00 <span class="fs-4 text-muted">kg</span></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card text-center h-100 card-highlight">
+                        <div class="card-header">Estoque Geral</div>
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <p class="card-title fs-5 mb-2">Estoque Total</p>
+                            <h2 class="display-4 fw-bold" id="estoque-total">0.0 <span class="fs-4 text-muted">kg</span></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">Informações Atuais</div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                Produto Selecionado:
+                                <span class="badge bg-primary rounded-pill fs-6" id="produto-atual">N/A</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                Última Movimentação:
+                                <span class="badge bg-secondary rounded-pill fs-6" id="ultima-movimentacao">Nenhuma</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-info mt-3" role="alert">
+                <h4 class="alert-heading">Status do Sistema</h4>
+                <p>Este painel é atualizado a cada 3 segundos com as informações enviadas pelo seu dispositivo ESP32.</p>
+                <hr>
+                <p class="mb-0" id="status-conexao">Conectando ao Blynk...</p>
+            </div>
+        </main>
+    </div>
+
+    <footer class="text-center text-muted p-3">
+        <p>&copy; 2025 SMPP Soluções. Desenvolvido com base no seu projeto.</p>
+    </footer>
+
+    <!-- Bootstrap JS (necessário para as abas de login/registro) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JavaScript da Aplicação -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Configurações e Elementos do DOM ---
+            const BLYNK_AUTH_TOKEN = "-YSPsUFVkayOjLpzNrE7NJe58sGBS78f";
+            const BLYNK_SERVER_URL = "https://blynk.cloud"; 
+            const PINS = ['v0', 'v1', 'v2', 'v3']; 
+            const API_URL = `${BLYNK_SERVER_URL}/external/api/get?token=${BLYNK_AUTH_TOKEN}&${PINS.join('&')}`;
+
+            // Seções da UI
+            const loginSection = document.getElementById('login-section');
+            const dashboardSection = document.getElementById('dashboard-section');
+            const userInfo = document.getElementById('user-info');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const connectionIndicator = document.getElementById('connection-status-indicator');
+            
+            // Formulários e Alertas
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const authAlert = document.getElementById('auth-alert');
+
+            // Botões
+            const logoutButton = document.getElementById('logout-button');
+
+            // Elementos do Dashboard
+            const elPesoAtual = document.getElementById('peso-atual');
+            const elEstoqueTotal = document.getElementById('estoque-total');
+            const elProdutoAtual = document.getElementById('produto-atual');
+            const elUltimaMovimentacao = document.getElementById('ultima-movimentacao');
+            const elStatusConexao = document.getElementById('status-conexao');
+            
+            let blynkUpdateInterval; // Guarda o ID do setInterval
+
+            // --- Lógica de Autenticação ---
+            const getUsers = () => JSON.parse(localStorage.getItem('smpp_users')) || [];
+            const saveUsers = (users) => localStorage.setItem('smpp_users', JSON.stringify(users));
+
+            const showAlert = (message) => {
+                authAlert.textContent = message;
+                authAlert.classList.remove('d-none');
+            };
+            const hideAlert = () => authAlert.classList.add('d-none');
+
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                hideAlert();
+                const username = document.getElementById('register-username').value;
+                const password = document.getElementById('register-password').value;
+                const users = getUsers();
+
+                if (users.find(user => user.username === username) || username.toUpperCase() === 'ADM') {
+                    showAlert('Este nome de usuário já existe.');
+                    return;
+                }
+                users.push({ username, password });
+                saveUsers(users);
+                alert('Usuário registrado com sucesso! Faça o login.');
+                const loginTab = new bootstrap.Tab(document.getElementById('pills-login-tab'));
+                loginTab.show();
+                registerForm.reset();
+            });
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                hideAlert();
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+                const users = getUsers();
+                
+                let userFound = null;
+                if (username.toUpperCase() === 'ADM' && password === 'ADM') {
+                    userFound = { username: 'ADM', role: 'admin' };
+                } else {
+                    userFound = users.find(user => user.username === username && user.password === password);
+                }
+
+                if (userFound) {
+                    sessionStorage.setItem('loggedInUser', JSON.stringify(userFound));
+                    showDashboard();
+                } else {
+                    showAlert('Usuário ou senha inválidos.');
+                }
+            });
+
+            logoutButton.addEventListener('click', () => {
+                sessionStorage.removeItem('loggedInUser');
+                showLogin();
+            });
+
+            // --- Lógica de UI e Exibição ---
+            const showDashboard = () => {
+                const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
+                if (!user) return;
+
+                loginSection.classList.add('d-none');
+                dashboardSection.classList.remove('d-none');
+                userInfo.classList.remove('d-none');
+                welcomeMessage.textContent = `Bem-vindo, ${user.username}!`;
+                
+                // Inicia a busca de dados do Blynk
+                fetchBlynkData();
+                blynkUpdateInterval = setInterval(fetchBlynkData, 3000);
+            };
+
+            const showLogin = () => {
+                dashboardSection.classList.add('d-none');
+                loginSection.classList.remove('d-none');
+                userInfo.classList.add('d-none');
+                if (blynkUpdateInterval) {
+                    clearInterval(blynkUpdateInterval);
+                }
+            };
+            
+            // --- Lógica do Blynk ---
+            async function fetchBlynkData() {
+                // Define o status como pendente antes de cada tentativa
+                connectionIndicator.className = 'pending';
+                connectionIndicator.title = 'Tentando conectar ao Blynk...';
+                try {
+                    const response = await fetch(API_URL);
+                    if (!response.ok) {
+                        if(response.status === 400) throw new Error(`Dispositivo offline ou token inválido.`);
+                        throw new Error(`Erro de rede: ${response.statusText}`);
+                    }
+                    const data = await response.json();
+                    
+                    elPesoAtual.innerHTML = `${parseFloat(data.v0 || 0).toFixed(2)} <span class="fs-4 text-muted">kg</span>`;
+                    elEstoqueTotal.innerHTML = `${parseFloat(data.v1 || 0).toFixed(1)} <span class="fs-4 text-muted">kg</span>`;
+                    elUltimaMovimentacao.textContent = data.v2 || 'Nenhuma';
+                    elProdutoAtual.textContent = data.v3 || 'N/A';
+                    elStatusConexao.textContent = `Conectado e atualizado em: ${new Date().toLocaleTimeString()}`;
+                    elStatusConexao.className = 'connected';
+                    connectionIndicator.className = 'connected';
+                    connectionIndicator.title = 'Conectado com sucesso!';
+
+                } catch (error) {
+                    console.error('Falha ao buscar dados do Blynk:', error);
+                    elStatusConexao.textContent = `Erro de conexão: ${error.message}`;
+                    elStatusConexao.className = 'error';
+                    connectionIndicator.className = 'error';
+                    connectionIndicator.title = `Erro de conexão: ${error.message}`;
+                }
+            }
+
+            // --- Inicialização da Aplicação ---
+            function init() {
+                const loggedInUser = sessionStorage.getItem('loggedInUser');
+                if (loggedInUser) {
+                    showDashboard();
+                } else {
+                    showLogin();
+                }
+            }
+            
+            init();
+        });
+    </script>
+</body>
+</html>
+
